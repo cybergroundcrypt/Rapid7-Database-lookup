@@ -1,0 +1,55 @@
+#!/bin/python3
+
+from bs4 import BeautifulSoup
+import requests 
+
+banner = """ 
+    ___(                        )
+   (                          _)
+  (_                       __))
+    ((                _____)
+      (_________)----'
+         _/  /
+        /  _/
+      _/  /
+     / __/
+   _/ /
+  /__/
+ //
+/'
+"""
+
+# Prompts user for the name of the exploit 
+print(banner)
+print("What exploit are you looking for: ")
+exploit = input("> ")
+print("Which page would you like to go to? (starting from 1)") 
+page = input("> ") 
+
+# Sets up the header 
+headers = requests.utils.default_headers()
+headers.update({
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0',
+})
+
+# Get request using what the user provided 
+html_page = requests.get("https://www.rapid7.com/db/?q=" + exploit + "&type=nexpose" + "&page=" + page, headers=headers).text
+
+# Grabs the information regarding the exploit from the site 
+soup = BeautifulSoup(html_page, "lxml")
+vulnerabilities = soup.find_all("div", class_="resultblock__info-title" )
+links = soup.find_all("a", class_="vulndb__result resultblock")
+
+
+print("List of vulnerabilities:\n______________________________________________________________________________\n\n")
+
+# Will be used to get the links to the exploit 
+counter = 0
+baseLink = "https://www.rapid7.com"
+
+# Loop that prints the output 
+for vuln in vulnerabilities:
+
+	print("Vulnerability: \n" + vuln.text.replace(" ","") + "Link: " + baseLink + links[counter].get('href') + "\n")
+	counter = counter + 1
+
